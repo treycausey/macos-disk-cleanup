@@ -52,13 +52,23 @@ Generate a fast disk-usage report, identify the biggest culprits, and carry out 
 - **Prime Video**
   - `~/Library/Containers/com.amazon.aiv.AIVApp/Data/Library/com.apple.UserManagedAssets*`
 - **Brave (cache only)**
-  - `~/Library/Application Support/BraveSoftware/Brave-Browser/Default/Service Worker`
-  - `~/Library/Application Support/BraveSoftware/Brave-Browser/Default/Cache`
-  - `~/Library/Application Support/BraveSoftware/Brave-Browser/Default/Code Cache`
-  - `~/Library/Application Support/BraveSoftware/Brave-Browser/Default/GPUCache`
-  - `~/Library/Application Support/BraveSoftware/Brave-Browser/ShaderCache`
-  - `~/Library/Application Support/BraveSoftware/Brave-Browser/GrShaderCache`
-  - `~/Library/Application Support/BraveSoftware/Brave-Browser/component_crx_cache`
+  - Paths are discovered at run time, not hardcoded, because Brave's layout differs
+    between versions and installs.
+  - Roots searched: `~/Library/Application Support/BraveSoftware/Brave-Browser` and
+    `~/Library/Caches/BraveSoftware/Brave-Browser` (each only if present), at the
+    browser root and in every profile (`Default` and any `Profile N`).
+  - Cache directory names matched: `Cache`, `Code Cache`, `GPUCache`, `ShaderCache`,
+    `GrShaderCache`, `DawnGraphiteCache`, `DawnWebGPUCache`, `GraphiteDawnCache`,
+    `component_crx_cache`, `extensions_crx_cache`, `Service Worker/CacheStorage`.
+  - Never selected: `Local Storage`, `Session Storage`, `IndexedDB`, `Cookies`,
+    `History`, `Extensions`, `Local Extension Settings`, `Extension State`,
+    `WebStorage`, `blob_storage`. Those are user data, not cache.
+  - If nothing matches, the script names the roots it searched on stderr instead of
+    reporting success.
+- **uv cache (manual, not scripted)**
+  - `uv cache clean` blocks on the cache `.lock` held by any long-running `uv run`
+    service (for example a launchd `uv run uvicorn`) and waits about 300s; use
+    `uv cache clean --force` to skip the in-use check.
 
 ## Scripts
 

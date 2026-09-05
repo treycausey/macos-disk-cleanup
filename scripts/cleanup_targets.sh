@@ -119,13 +119,60 @@ if $SELECT_PRIME; then
 fi
 
 if $SELECT_BRAVE; then
-  add_if_exists "$HOME/Library/Application Support/BraveSoftware/Brave-Browser/Default/Service Worker"
-  add_if_exists "$HOME/Library/Application Support/BraveSoftware/Brave-Browser/Default/Cache"
-  add_if_exists "$HOME/Library/Application Support/BraveSoftware/Brave-Browser/Default/Code Cache"
-  add_if_exists "$HOME/Library/Application Support/BraveSoftware/Brave-Browser/Default/GPUCache"
-  add_if_exists "$HOME/Library/Application Support/BraveSoftware/Brave-Browser/Default/ShaderCache"
-  add_if_exists "$HOME/Library/Application Support/BraveSoftware/Brave-Browser/GrShaderCache"
-  add_if_exists "$HOME/Library/Application Support/BraveSoftware/Brave-Browser/component_crx_cache"
+  # Brave's on-disk layout varies by version and install, so discover the cache
+  # directories instead of hardcoding one snapshot of one layout.
+  BRAVE_ROOTS=(
+    "$HOME/Library/Application Support/BraveSoftware/Brave-Browser"
+    "$HOME/Library/Caches/BraveSoftware/Brave-Browser"
+  )
+
+  # Regenerable cache directories only. Never add user data such as
+  # Local Storage, Session Storage, IndexedDB, Cookies, History, Extensions,
+  # Local Extension Settings, Extension State, WebStorage, or blob_storage:
+  # trashing those loses site logins and browsing data.
+  BRAVE_CACHE_DIRS=(
+    "Cache"
+    "Code Cache"
+    "GPUCache"
+    "ShaderCache"
+    "GrShaderCache"
+    "DawnGraphiteCache"
+    "DawnWebGPUCache"
+    "GraphiteDawnCache"
+    "component_crx_cache"
+    "extensions_crx_cache"
+    "Service Worker/CacheStorage"
+  )
+
+  BRAVE_COUNT_BEFORE=${#TARGETS[@]}
+
+  for brave_root in "${BRAVE_ROOTS[@]}"; do
+    [[ -d "$brave_root" ]] || continue
+
+    # Browser-root-level caches, shared across profiles.
+    for brave_cache_dir in "${BRAVE_CACHE_DIRS[@]}"; do
+      add_if_exists "$brave_root/$brave_cache_dir"
+    done
+
+    # Per-profile caches: Default plus any additional "Profile N" directories.
+    for brave_profile in "$brave_root/Default" "$brave_root/Profile "*; do
+      [[ -d "$brave_profile" ]] || continue
+      for brave_cache_dir in "${BRAVE_CACHE_DIRS[@]}"; do
+        add_if_exists "$brave_profile/$brave_cache_dir"
+      done
+    done
+  done
+
+  if [[ ${#TARGETS[@]} -eq $BRAVE_COUNT_BEFORE ]]; then
+    echo "No Brave cache directories found. Roots searched:" >&2
+    for brave_root in "${BRAVE_ROOTS[@]}"; do
+      if [[ -d "$brave_root" ]]; then
+        echo "- $brave_root (present, no matching cache directories)" >&2
+      else
+        echo "- $brave_root (not present)" >&2
+      fi
+    done
+  fi
 fi
 
 if [[ ${#TARGETS[@]} -eq 0 ]]; then

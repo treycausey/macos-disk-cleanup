@@ -68,4 +68,6 @@ Use this skill when you want to:
 - Close related apps before cleanup for consistent results.
 - `--quit-apps` forcibly stops matching apps.
 - Do not treat cached data as disposable unless you understand what will be regenerated and what may be lost.
+- `--brave-cache` discovers Brave's cache directories at run time (both plausible roots, every profile) rather than assuming one layout, and reports the roots it searched when nothing matches.
+- `uv cache clean` blocks on the cache `.lock` held by a long-running `uv run` service (for example a launchd `uv run uvicorn`) and waits about 300s; use `uv cache clean --force`.
 - Keep backups for anything you cannot afford to lose.
