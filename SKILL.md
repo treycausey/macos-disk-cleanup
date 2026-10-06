@@ -9,6 +9,12 @@ description: Identify large disk usage on macOS, propose a cleanup plan, and per
 
 Generate a fast disk-usage report, identify the biggest culprits, and carry out targeted cleanup in a safe, reversible way (move to Trash) with clear user confirmation.
 
+## Never relocate app data with a symlink
+
+Do not move an app's data folder to another volume and leave a symlink in its place. This applies to Messages, Photos, Mail, and anything under `~/Library/Containers`, `~/Library/Group Containers`, or `~/Library/Messages`. Sandboxed apps cannot read or write through a symlink to `/Volumes`. They fail without a visible error: the kernel log shows `Sandbox: … deny(1) file-write-create /Volumes/…`, and the app shows blank placeholders. On 2026-09-27, a cleanup session moved `~/Library/Messages/Attachments` (49 GB) to an external drive this way. No Messages attachment downloaded for 9 days.
+
+To free space from app data, use the app's own setting instead: Messages "Keep messages" or Messages in iCloud, Photos "Optimize Mac Storage", or the app's library-location setting. Before you move any folder off the boot volume, ask the user and name the app that owns it.
+
 ## Quick Start
 
 1. Run `scripts/scan_disk_usage.sh` to gather a summary.
