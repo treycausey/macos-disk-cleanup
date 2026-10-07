@@ -1,6 +1,6 @@
 ---
 name: macos-disk-cleanup
-description: Identify large disk usage on macOS, propose a cleanup plan, and perform safe disk cleanup using Trash (not rm) for common heavy locations like ~/Library, Application Support, Developer/Xcode caches, simulator devices, device support, media app downloads (Podcasts/Prime Video), browser caches (Brave), and Claude VM bundles. Use when the user asks to find largest files/folders, reduce disk usage, or clean caches on macOS.
+description: "Find macOS disk usage and move approved cleanup to Trash."
 ---
 
 # macOS Disk Cleanup
@@ -8,6 +8,10 @@ description: Identify large disk usage on macOS, propose a cleanup plan, and per
 ## Overview
 
 Generate a fast disk-usage report, identify the biggest culprits, and carry out targeted cleanup in a safe, reversible way (move to Trash) with clear user confirmation.
+
+## Interactive app
+
+`diskclean` (repo `~/dev/diskclean`, github.com/treycausey/diskclean) is a web UI over these same scripts: it reads its target list from `scripts/cleanup_targets.sh`, so a change here shows up there. It runs on both Macs as launchd `com.treycausey.diskclean` at http://127.0.0.1:4510 (local only, not on the tailnet). If the user wants to click through cleanup instead of chatting, point them to it. After changing `cleanup_targets.sh` output format (the `Targets to move to Trash:` header or the `- <path>` lines), run `bun run smoke` in `~/dev/diskclean`.
 
 ## Never relocate app data with a symlink
 
